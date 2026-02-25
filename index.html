@@ -58,6 +58,7 @@
       padding: 20px;
       background: #fff;
       border-radius: 8px;
+      max-width: 450px; /* NARROWER OUTPUT */
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
@@ -75,6 +76,11 @@
       padding: 3px 0;
       border-bottom: 1px solid #eee;
       font-size: 14px;
+    }
+
+    .result-row span:last-child {
+      min-width: 80px;       /* NARROWER VALUE COLUMN */
+      text-align: right;
     }
 
     .result-row:last-child {
