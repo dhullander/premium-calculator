@@ -44,12 +44,12 @@
       border-left: 6px solid #ffe066;
     }
 
-    /* NEW: separate right-side boxes */
+    /* Right-side boxes */
     .side-box {
       background: #ffffff;
       padding: 20px;
       border-radius: 8px;
-      width: 380px;
+      width: 420px; /* a bit wider so everything fits comfortably */
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       border-left: 6px solid #7bbf8f;
       margin-bottom: 30px;
@@ -144,8 +144,15 @@
     .rate-row {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 10px;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    /* Smaller, more compact inputs for rate comparison */
+    .rate-row input {
+      width: 100%;
+      padding: 6px;
+      font-size: 13px;
     }
 
     .age-output {
