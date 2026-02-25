@@ -7,7 +7,7 @@
     body {
       font-family: Arial, sans-serif;
       margin: 40px;
-      background: #fffbe6; /* LIGHT YELLOW BACKGROUND */
+      background: #fffbe6;
       color: #333;
     }
 
@@ -22,7 +22,7 @@
       border-radius: 8px;
       max-width: 600px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      border-left: 6px solid #ffe066; /* YELLOW ACCENT */
+      border-left: 6px solid #ffe066;
     }
 
     label {
@@ -44,7 +44,7 @@
       padding: 10px 20px;
       font-size: 15px;
       cursor: pointer;
-      background: #ffe066; /* YELLOW BUTTON */
+      background: #ffe066;
       color: #333;
       border: none;
       border-radius: 4px;
@@ -58,36 +58,58 @@
     .results {
       margin-top: 30px;
       padding: 20px;
-      background: #ffffff;
+      background: #f2f8f4;
       border-radius: 8px;
       max-width: 450px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      border-left: 6px solid #ffe066; /* YELLOW ACCENT */
+      border-left: 6px solid #7bbf8f;
     }
 
     .section-title {
       font-size: 18px;
       margin-top: 15px;
-      border-bottom: 2px solid #ffe066; /* YELLOW LINE */
       padding-bottom: 3px;
       margin-bottom: 6px;
+      border-bottom: 2px solid #7bbf8f;
+    }
+
+    .section-title.short-rate {
+      border-bottom: 2px solid #ff9999;
     }
 
     .result-row {
       display: flex;
       justify-content: space-between;
-      padding: 3px 0;
-      border-bottom: 1px solid #eee;
+      align-items: center;
+      padding: 4px 0;
+      border-bottom: 1px solid #d9e6dd;
       font-size: 14px;
     }
 
-    .result-row span:last-child {
-      min-width: 80px;
-      text-align: right;
+    .result-label {
+      flex: 1;
     }
 
-    .result-row:last-child {
-      border-bottom: none;
+    .result-value {
+      width: 90px;        /* consistent width */
+      text-align: right;
+      font-weight: bold;
+    }
+
+    .copy-btn {
+      padding: 2px 6px;
+      font-size: 12px;
+      cursor: pointer;
+      background: #e6f5eb;
+      border: 1px solid #7bbf8f;
+      border-radius: 4px;
+      color: #2f6f4e;
+      margin-left: 6px;
+      white-space: nowrap;
+    }
+
+    .copy-btn:hover {
+      background: #d4efdf;
     }
 
     .error {
@@ -125,14 +147,44 @@
 <div class="results" id="results" style="display:none;">
 
   <div class="section-title">Pro‑Rata</div>
-  <div class="result-row"><span>Earned Premium:</span> <span id="prEarned"></span></div>
-  <div class="result-row"><span>Unearned Premium (return):</span> <span id="prUnearned"></span></div>
-  <div class="result-row"><span>Pro‑Rata Factor:</span> <span id="prFactor"></span></div>
 
-  <div class="section-title">Short‑Rate (10% Penalty)</div>
-  <div class="result-row"><span>Earned Premium:</span> <span id="srEarned"></span></div>
-  <div class="result-row"><span>Unearned Premium (return):</span> <span id="srUnearned"></span></div>
-  <div class="result-row"><span>Short‑Rate Factor:</span> <span id="srFactor"></span></div>
+  <div class="result-row">
+    <span class="result-label">Earned Premium:</span>
+    <span class="result-value" id="prEarned"></span>
+    <button class="copy-btn" onclick="copyValue('prEarned')">Copy</button>
+  </div>
+
+  <div class="result-row">
+    <span class="result-label">Unearned Premium (return):</span>
+    <span class="result-value" id="prUnearned"></span>
+    <button class="copy-btn" onclick="copyValue('prUnearned')">Copy</button>
+  </div>
+
+  <div class="result-row">
+    <span class="result-label">Pro‑Rata Factor:</span>
+    <span class="result-value" id="prFactor"></span>
+    <button class="copy-btn" onclick="copyValue('prFactor')">Copy</button>
+  </div>
+
+  <div class="section-title short-rate">Short‑Rate (10% Penalty)</div>
+
+  <div class="result-row">
+    <span class="result-label">Earned Premium:</span>
+    <span class="result-value" id="srEarned"></span>
+    <button class="copy-btn" onclick="copyValue('srEarned')">Copy</button>
+  </div>
+
+  <div class="result-row">
+    <span class="result-label">Unearned Premium (return):</span>
+    <span class="result-value" id="srUnearned"></span>
+    <button class="copy-btn" onclick="copyValue('srUnearned')">Copy</button>
+  </div>
+
+  <div class="result-row">
+    <span class="result-label">Short‑Rate Factor:</span>
+    <span class="result-value" id="srFactor"></span>
+    <button class="copy-btn" onclick="copyValue('srFactor')">Copy</button>
+  </div>
 
 </div>
 
@@ -157,12 +209,10 @@
     return `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()}`;
   }
 
-  // Auto-fill cancellation date with today's date
   window.onload = function () {
     document.getElementById("cancelDate").value = formatDate(new Date());
   };
 
-  // Auto-fill end date = start date + 1 year
   document.getElementById("startDate").addEventListener("input", function () {
     const start = parseDate(this.value);
     if (start) {
@@ -200,21 +250,24 @@
     const earned = premium * (usedDays / totalDays);
     const unearned = premium - earned;
 
-    // Short‑rate = 10% penalty on unearned premium
     const penalty = unearned * 0.10;
     const shortRateUnearned = unearned - penalty;
 
-    // Populate Pro‑Rata
-    document.getElementById("prEarned").textContent = earned.toFixed(2);
-    document.getElementById("prUnearned").textContent = unearned.toFixed(2);
+    // Add $ signs
+    document.getElementById("prEarned").textContent = "$" + earned.toFixed(2);
+    document.getElementById("prUnearned").textContent = "$" + unearned.toFixed(2);
     document.getElementById("prFactor").textContent = (unearned / premium).toFixed(4);
 
-    // Populate Short‑Rate
-    document.getElementById("srEarned").textContent = earned.toFixed(2);
-    document.getElementById("srUnearned").textContent = shortRateUnearned.toFixed(2);
+    document.getElementById("srEarned").textContent = "$" + earned.toFixed(2);
+    document.getElementById("srUnearned").textContent = "$" + shortRateUnearned.toFixed(2);
     document.getElementById("srFactor").textContent = (shortRateUnearned / premium).toFixed(4);
 
     document.getElementById("results").style.display = "block";
+  }
+
+  function copyValue(id) {
+    const value = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(value);
   }
 </script>
 
