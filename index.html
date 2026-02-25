@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>Midterm Cancellation Premium Calculator</title>
+
+  <!-- Favicon: small yellow airplane -->
+  <link rel="icon" type="image/svg+xml"
+        href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="%23ffe066"/><path d="M10 34 L54 30 L54 34 L10 38 Z" fill="%23cc9900"/><path d="M26 20 L34 20 L40 44 L32 44 Z" fill="%23cc9900"/></svg>'>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -79,19 +84,24 @@
 
     .result-row {
       display: flex;
-      justify-content: space-between;
       align-items: center;
       padding: 4px 0;
       border-bottom: 1px solid #d9e6dd;
       font-size: 14px;
+      gap: 6px;
+    }
+
+    .result-row:last-child {
+      border-bottom: none;
     }
 
     .result-label {
       flex: 1;
+      min-width: 0;
     }
 
     .result-value {
-      width: 90px;        /* consistent width */
+      width: 90px;
       text-align: right;
       font-weight: bold;
     }
@@ -104,8 +114,8 @@
       border: 1px solid #7bbf8f;
       border-radius: 4px;
       color: #2f6f4e;
-      margin-left: 6px;
       white-space: nowrap;
+      margin-top: 0; /* keep vertically centered */
     }
 
     .copy-btn:hover {
@@ -253,7 +263,6 @@
     const penalty = unearned * 0.10;
     const shortRateUnearned = unearned - penalty;
 
-    // Add $ signs
     document.getElementById("prEarned").textContent = "$" + earned.toFixed(2);
     document.getElementById("prUnearned").textContent = "$" + unearned.toFixed(2);
     document.getElementById("prFactor").textContent = (unearned / premium).toFixed(4);
