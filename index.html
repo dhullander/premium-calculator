@@ -4,9 +4,15 @@
   <meta charset="UTF-8">
   <title>Midterm Cancellation Premium Calculator</title>
 
-  <!-- Favicon: small yellow airplane -->
+  <!-- Larger, clearer yellow airplane favicon -->
   <link rel="icon" type="image/svg+xml"
-        href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="%23ffe066"/><path d="M10 34 L54 30 L54 34 L10 38 Z" fill="%23cc9900"/><path d="M26 20 L34 20 L40 44 L32 44 Z" fill="%23cc9900"/></svg>'>
+        href='data:image/svg+xml,
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+          <rect width="100" height="100" fill="%23ffe066"/>
+          <path d="M10 55 L90 45 L90 55 L10 65 Z" fill="%23cc9900"/>
+          <path d="M40 20 L60 20 L75 80 L55 80 Z" fill="%23cc9900"/>
+          <path d="M25 40 L75 40 L75 45 L25 45 Z" fill="%23cc9900"/>
+        </svg>'>
 
   <style>
     body {
@@ -83,12 +89,13 @@
     }
 
     .result-row {
-      display: flex;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
       align-items: center;
-      padding: 4px 0;
+      padding: 6px 0;
       border-bottom: 1px solid #d9e6dd;
       font-size: 14px;
-      gap: 6px;
+      column-gap: 10px;
     }
 
     .result-row:last-child {
@@ -96,14 +103,14 @@
     }
 
     .result-label {
-      flex: 1;
-      min-width: 0;
+      white-space: nowrap;
     }
 
     .result-value {
       width: 90px;
       text-align: right;
       font-weight: bold;
+      white-space: nowrap;
     }
 
     .copy-btn {
@@ -115,7 +122,6 @@
       border-radius: 4px;
       color: #2f6f4e;
       white-space: nowrap;
-      margin-top: 0; /* keep vertically centered */
     }
 
     .copy-btn:hover {
