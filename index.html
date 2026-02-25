@@ -28,13 +28,31 @@
       margin-bottom: 20px;
     }
 
+    /* Two-column layout */
+    .layout {
+      display: flex;
+      gap: 40px;
+      align-items: flex-start;
+    }
+
     .container {
       background: #ffffff;
       padding: 25px;
       border-radius: 8px;
-      max-width: 600px;
+      width: 600px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       border-left: 6px solid #ffe066;
+    }
+
+    /* NEW: separate right-side boxes */
+    .side-box {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      width: 380px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      border-left: 6px solid #7bbf8f;
+      margin-bottom: 30px;
     }
 
     label {
@@ -99,19 +117,10 @@
       column-gap: 10px;
     }
 
-    .result-row:last-child {
-      border-bottom: none;
-    }
-
-    .result-label {
-      white-space: nowrap;
-    }
-
     .result-value {
       width: 90px;
       text-align: right;
       font-weight: bold;
-      white-space: nowrap;
     }
 
     .copy-btn {
@@ -122,12 +131,7 @@
       border: 1px solid #7bbf8f;
       border-radius: 4px;
       color: #2f6f4e;
-      white-space: nowrap;
-      margin-top: 0; /* fix alignment vs global button rule */
-    }
-
-    .copy-btn:hover {
-      background: #d4efdf;
+      margin-top: 0 !important;
     }
 
     .error {
@@ -135,87 +139,128 @@
       font-weight: bold;
       margin-top: 10px;
     }
+
+    /* Rate comparison rows */
+    .rate-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .age-output {
+      margin-top: 10px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <h1>Midterm Cancellation Premium Calculator</h1>
+<div class="layout">
 
-  <form id="premiumForm" onsubmit="event.preventDefault(); calculate();">
+  <!-- LEFT COLUMN: Cancellation Calculator -->
+  <div class="container">
+    <h1>Midterm Cancellation Premium Calculator</h1>
 
-    <label>Premium:</label>
-    <input type="number" id="fullPremium" min="0" required>
+    <form id="premiumForm" onsubmit="event.preventDefault(); calculate();">
 
-    <label>Policy Start Date:</label>
-    <input type="text" id="startDate" placeholder="MM/DD/YYYY" required>
+      <label>Premium:</label>
+      <input type="number" id="fullPremium" min="0" required>
 
-    <label>Policy End Date:</label>
-    <input type="text" id="endDate" placeholder="MM/DD/YYYY" required>
+      <label>Policy Start Date:</label>
+      <input type="text" id="startDate" placeholder="MM/DD/YYYY" required>
 
-    <label>Cancellation Date:</label>
-    <input type="text" id="cancelDate" placeholder="MM/DD/YYYY" required>
+      <label>Policy End Date:</label>
+      <input type="text" id="endDate" placeholder="MM/DD/YYYY" required>
 
-    <div id="errorMessage" class="error" style="display:none;"></div>
+      <label>Cancellation Date:</label>
+      <input type="text" id="cancelDate" placeholder="MM/DD/YYYY" required>
 
-    <button type="submit">Calculate</button>
-  </form>
-</div>
+      <div id="errorMessage" class="error" style="display:none;"></div>
 
-<div class="results" id="results" style="display:none;">
+      <button type="submit">Calculate</button>
+    </form>
 
-  <div class="section-title">Pro‑Rata</div>
+    <div class="results" id="results" style="display:none;">
 
-  <div class="result-row">
-    <span class="result-label">Earned Premium:</span>
-    <span class="result-value" id="prEarned"></span>
-    <button class="copy-btn" onclick="copyValue('prEarned')">Copy</button>
+      <div class="section-title">Pro‑Rata</div>
+
+      <div class="result-row">
+        <span>Earned Premium:</span>
+        <span class="result-value" id="prEarned"></span>
+        <button class="copy-btn" onclick="copyValue('prEarned')">Copy</button>
+      </div>
+
+      <div class="result-row">
+        <span>Unearned Premium (return):</span>
+        <span class="result-value" id="prUnearned"></span>
+        <button class="copy-btn" onclick="copyValue('prUnearned')">Copy</button>
+      </div>
+
+      <div class="result-row">
+        <span>Pro‑Rata Factor:</span>
+        <span class="result-value" id="prFactor"></span>
+        <button class="copy-btn" onclick="copyValue('prFactor')">Copy</button>
+      </div>
+
+      <div class="section-title short-rate">Short‑Rate (10% Penalty)</div>
+
+      <div class="result-row">
+        <span>Earned Premium:</span>
+        <span class="result-value" id="srEarned"></span>
+        <button class="copy-btn" onclick="copyValue('srEarned')">Copy</button>
+      </div>
+
+      <div class="result-row">
+        <span>Unearned Premium (return):</span>
+        <span class="result-value" id="srUnearned"></span>
+        <button class="copy-btn" onclick="copyValue('srUnearned')">Copy</button>
+      </div>
+
+      <div class="result-row">
+        <span>Short‑Rate Factor:</span>
+        <span class="result-value" id="srFactor"></span>
+        <button class="copy-btn" onclick="copyValue('srFactor')">Copy</button>
+      </div>
+
+    </div>
   </div>
 
-  <div class="result-row">
-    <span class="result-label">Unearned Premium (return):</span>
-    <span class="result-value" id="prUnearned"></span>
-    <button class="copy-btn" onclick="copyValue('prUnearned')">Copy</button>
-  </div>
+  <!-- RIGHT COLUMN: Two separate boxes -->
+  <div>
 
-  <div class="result-row">
-    <span class="result-label">Pro‑Rata Factor:</span>
-    <span class="result-value" id="prFactor"></span>
-    <button class="copy-btn" onclick="copyValue('prFactor')">Copy</button>
-  </div>
+    <!-- RATE COMPARISON BOX -->
+    <div class="side-box">
+      <h2>Rate Comparison Calculator</h2>
 
-  <div class="section-title short-rate">Short‑Rate (10% Penalty)</div>
+      <div id="rateRows"></div>
 
-  <div class="result-row">
-    <span class="result-label">Earned Premium:</span>
-    <span class="result-value" id="srEarned"></span>
-    <button class="copy-btn" onclick="copyValue('srEarned')">Copy</button>
-  </div>
+      <button onclick="addRateRow()">Add Row</button>
+    </div>
 
-  <div class="result-row">
-    <span class="result-label">Unearned Premium (return):</span>
-    <span class="result-value" id="srUnearned"></span>
-    <button class="copy-btn" onclick="copyValue('srUnearned')">Copy</button>
-  </div>
+    <!-- AGE CALCULATOR BOX -->
+    <div class="side-box">
+      <h2>Age Calculator</h2>
 
-  <div class="result-row">
-    <span class="result-label">Short‑Rate Factor:</span>
-    <span class="result-value" id="srFactor"></span>
-    <button class="copy-btn" onclick="copyValue('srFactor')">Copy</button>
+      <label>Birthdate (MM/DD/YYYY):</label>
+      <input type="text" id="birthdate" placeholder="MM/DD/YYYY" oninput="calculateAge()">
+
+      <div class="age-output">Age: <span id="ageResult"></span></div>
+    </div>
+
   </div>
 
 </div>
 
 <script>
+  /* Shared date parser */
   function parseDate(input) {
     if (!input) return null;
     const parts = input.trim().split('/');
     if (parts.length !== 3) return null;
-
     const m = parseInt(parts[0], 10);
     const d = parseInt(parts[1], 10);
     const y = parseInt(parts[2], 10);
-
     const date = new Date(y, m - 1, d);
     if (date.getMonth() !== m - 1 || date.getDate() !== d || date.getFullYear() !== y) {
       return null;
@@ -229,17 +274,10 @@
 
   window.onload = function () {
     document.getElementById("cancelDate").value = formatDate(new Date());
+    addRateRow(); addRateRow(); addRateRow();
   };
 
-  document.getElementById("startDate").addEventListener("input", function () {
-    const start = parseDate(this.value);
-    if (start) {
-      const end = new Date(start);
-      end.setFullYear(end.getFullYear() + 1);
-      document.getElementById("endDate").value = formatDate(end);
-    }
-  });
-
+  /* Cancellation calculator */
   function calculate() {
     const premium = parseFloat(document.getElementById('fullPremium').value);
     const start = parseDate(document.getElementById('startDate').value);
@@ -285,6 +323,56 @@
   function copyValue(id) {
     const value = document.getElementById(id).textContent;
     navigator.clipboard.writeText(value);
+  }
+
+  /* Rate comparison calculator */
+  function addRateRow() {
+    const container = document.getElementById("rateRows");
+
+    const row = document.createElement("div");
+    row.className = "rate-row";
+
+    row.innerHTML = `
+      <input type="number" placeholder="Hull Value" oninput="updateRate(this)">
+      <input type="number" placeholder="Premium" oninput="updateRate(this)">
+      <input type="text" placeholder="Rate" readonly>
+    `;
+
+    container.appendChild(row);
+  }
+
+  function updateRate(el) {
+    const row = el.parentElement;
+    const hull = parseFloat(row.children[0].value);
+    const prem = parseFloat(row.children[1].value);
+
+    if (hull > 0 && prem >= 0) {
+      row.children[2].value = (prem / hull).toFixed(4);
+    } else {
+      row.children[2].value = "";
+    }
+  }
+
+  /* Age calculator */
+  function calculateAge() {
+    const input = document.getElementById("birthdate").value;
+    const dob = parseDate(input);
+    const out = document.getElementById("ageResult");
+
+    if (!dob) {
+      out.textContent = "";
+      return;
+    }
+
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+
+    out.textContent = age;
   }
 </script>
 
