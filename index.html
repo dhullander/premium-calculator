@@ -18,19 +18,25 @@
 <h1>Midterm Cancellation Premium Calculator</h1>
 
 <form id="premiumForm" onsubmit="event.preventDefault(); calculate();">
+
   <label>
     Full Policy Premium ($):
     <input type="number" id="fullPremium" step="0.01" min="0" required>
   </label>
 
   <label>
-    Full Policy Term (days):
-    <input type="number" id="fullTermDays" step="1" min="1" required>
+    Policy Start Date:
+    <input type="text" id="startDate" placeholder="MM/DD/YYYY" required>
   </label>
 
   <label>
-    Days Used Before Cancellation:
-    <input type="number" id="daysUsed" step="1" min="0" required>
+    Policy End Date:
+    <input type="text" id="endDate" placeholder="MM/DD/YYYY" required>
+  </label>
+
+  <label>
+    Cancellation Date:
+    <input type="text" id="cancelDate" placeholder="MM/DD/YYYY" required>
   </label>
 
   <label>
@@ -42,6 +48,8 @@
 </form>
 
 <div class="results" id="results" style="display:none;">
+  <div><strong>Total Policy Days:</strong> <span id="totalDays"></span></div>
+  <div><strong>Days Used:</strong> <span id="daysUsed"></span></div>
   <div><strong>Earned Premium:</strong> $<span id="earnedPremium"></span></div>
   <div><strong>Unearned Premium (Pro-Rata):</strong> $<span id="unearnedPremium"></span></div>
   <div><strong>Pro-Rata Refund:</strong> $<span id="proRataRefund"></span></div>
@@ -50,34 +58,31 @@
 </div>
 
 <script>
+  function parseDate(input) {
+    // Allows pasting formats like 6/29/2025
+    const parts = input.split('/');
+    return new Date(parts[2], parts[0] - 1, parts[1]);
+  }
+
   function calculate() {
     const fullPremium = parseFloat(document.getElementById('fullPremium').value) || 0;
-    const fullTermDays = parseFloat(document.getElementById('fullTermDays').value) || 0;
-    const daysUsed = parseFloat(document.getElementById('daysUsed').value) || 0;
+
+    const startDate = parseDate(document.getElementById('startDate').value);
+    const endDate = parseDate(document.getElementById('endDate').value);
+    const cancelDate = parseDate(document.getElementById('cancelDate').value);
+
     const shortRatePenaltyPercent = parseFloat(document.getElementById('shortRatePenalty').value) || 0;
 
-    if (fullPremium <= 0 || fullTermDays <= 0 || daysUsed < 0 || daysUsed > fullTermDays) {
-      alert('Please check your inputs. Days used must be between 0 and full term days.');
+    if (isNaN(startDate) || isNaN(endDate) || isNaN(cancelDate)) {
+      alert("Please enter valid dates in MM/DD/YYYY format.");
       return;
     }
 
-    const earnedPremium = fullPremium * (daysUsed / fullTermDays);
-    const unearnedPremium = fullPremium - earnedPremium;
-    const proRataRefund = unearnedPremium;
+    if (cancelDate < startDate || cancelDate > endDate) {
+      alert("Cancellation date must be between the policy start and end dates.");
+      return;
+    }
 
-    const penaltyFactor = shortRatePenaltyPercent / 100;
-    const shortRatePenaltyAmount = unearnedPremium * penaltyFactor;
-    const shortRateRefund = unearnedPremium - shortRatePenaltyAmount;
-
-    document.getElementById('earnedPremium').textContent = earnedPremium.toFixed(2);
-    document.getElementById('unearnedPremium').textContent = unearnedPremium.toFixed(2);
-    document.getElementById('proRataRefund').textContent = proRataRefund.toFixed(2);
-    document.getElementById('shortRatePenaltyAmount').textContent = shortRatePenaltyAmount.toFixed(2);
-    document.getElementById('shortRateRefund').textContent = shortRateRefund.toFixed(2);
-
-    document.getElementById('results').style.display = 'block';
-  }
-</script>
-
-</body>
-</html>
+    // Calculate days
+    const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+    const usedDays = Math.ceil
