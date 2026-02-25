@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Midterm Cancellation Premium Calculator</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 30px; background: #f7f7f7; }
+    h1 { font-size: 24px; }
+    label { display: block; margin-top: 12px; font-weight: bold; }
+    input { padding: 6px; margin-top: 4px; width: 220px; }
+    button { margin-top: 18px; padding: 10px 20px; font-size: 15px; cursor: pointer; }
+    .results { margin-top: 25px; padding: 15px; border: 1px solid #ccc; background: #fff; max-width: 450px; }
+    .results div { margin: 6px 0; }
+  </style>
+</head>
+<body>
+
+<h1>Midterm Cancellation Premium Calculator</h1>
+
+<form id="premiumForm" onsubmit="event.preventDefault(); calculate();">
+  <label>
+    Full Policy Premium ($):
+    <input type="number" id="fullPremium" step="0.01" min="0" required>
+  </label>
+
+  <label>
+    Full Policy Term (days):
+    <input type="number" id="fullTermDays" step="1" min="1" required>
+  </label>
+
+  <label>
+    Days Used Before Cancellation:
+    <input type="number" id="daysUsed" step="1" min="0" required>
+  </label>
+
+  <label>
+    Short-Rate Penalty (% of unearned premium):
+    <input type="number" id="shortRatePenalty" step="0.01" min="0" max="100" value="10">
+  </label>
+
+  <button type="submit">Calculate</button>
+</form>
+
+<div class="results" id="results" style="display:none;">
+  <div><strong>Earned Premium:</strong> $<span id="earnedPremium"></span></div>
+  <div><strong>Unearned Premium (Pro-Rata):</strong> $<span id="unearnedPremium"></span></div>
+  <div><strong>Pro-Rata Refund:</strong> $<span id="proRataRefund"></span></div>
+  <div><strong>Short-Rate Penalty Amount:</strong> $<span id="shortRatePenaltyAmount"></span></div>
+  <div><strong>Short-Rate Refund:</strong> $<span id="shortRateRefund"></span></div>
+</div>
+
+<script>
+  function calculate() {
+    const fullPremium = parseFloat(document.getElementById('fullPremium').value) || 0;
+    const fullTermDays = parseFloat(document.getElementById('fullTermDays').value) || 0;
+    const daysUsed = parseFloat(document.getElementById('daysUsed').value) || 0;
+    const shortRatePenaltyPercent = parseFloat(document.getElementById('shortRatePenalty').value) || 0;
+
+    if (fullPremium <= 0 || fullTermDays <= 0 || daysUsed < 0 || daysUsed > fullTermDays) {
+      alert('Please check your inputs. Days used must be between 0 and full term days.');
+      return;
+    }
+
+    const earnedPremium = fullPremium * (daysUsed / fullTermDays);
+    const unearnedPremium = fullPremium - earnedPremium;
+    const proRataRefund = unearnedPremium;
+
+    const penaltyFactor = shortRatePenaltyPercent / 100;
+    const shortRatePenaltyAmount = unearnedPremium * penaltyFactor;
+    const shortRateRefund = unearnedPremium - shortRatePenaltyAmount;
+
+    document.getElementById('earnedPremium').textContent = earnedPremium.toFixed(2);
+    document.getElementById('unearnedPremium').textContent = unearnedPremium.toFixed(2);
+    document.getElementById('proRataRefund').textContent = proRataRefund.toFixed(2);
+    document.getElementById('shortRatePenaltyAmount').textContent = shortRatePenaltyAmount.toFixed(2);
+    document.getElementById('shortRateRefund').textContent = shortRateRefund.toFixed(2);
+
+    document.getElementById('results').style.display = 'block';
+  }
+</script>
+
+</body>
+</html>
