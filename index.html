@@ -4,133 +4,208 @@
   <meta charset="UTF-8">
   <title>Midterm Cancellation Premium Calculator</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 30px; background: #f7f7f7; }
-    h1 { font-size: 24px; }
-    label { display: block; margin-top: 12px; font-weight: bold; }
-    input { padding: 6px; margin-top: 4px; width: 220px; }
-    button { margin-top: 18px; padding: 10px 20px; font-size: 15px; cursor: pointer; }
-    .results { margin-top: 25px; padding: 15px; border: 1px solid #ccc; background: #fff; max-width: 450px; }
-    .results div { margin: 6px 0; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background: #f4f4f4;
+      color: #333;
+    }
+
+    h1 {
+      font-size: 26px;
+      margin-bottom: 20px;
+    }
+
+    .container {
+      background: #fff;
+      padding: 25px;
+      border-radius: 8px;
+      max-width: 600px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input {
+      padding: 8px;
+      margin-top: 5px;
+      width: 250px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 15px;
+      cursor: pointer;
+      background: #0078d4;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      background: #005fa3;
+    }
+
+    .results {
+      margin-top: 30px;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .section-title {
+      font-size: 18px;
+      margin-top: 15px;
+      border-bottom: 2px solid #0078d4;
+      padding-bottom: 3px;
+      margin-bottom: 6px;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 3px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+
+    .result-row:last-child {
+      border-bottom: none;
+    }
+
+    .error {
+      color: #b30000;
+      font-weight: bold;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
 
-<h1>Midterm Cancellation Premium Calculator</h1>
+<div class="container">
+  <h1>Midterm Cancellation Premium Calculator</h1>
 
-<form id="premiumForm" onsubmit="event.preventDefault(); calculate();">
+  <form id="premiumForm" onsubmit="event.preventDefault(); calculate();">
 
-  <label>
-    Full Policy Premium ($):
+    <label>Full Policy Premium ($):</label>
     <input type="number" id="fullPremium" step="0.01" min="0" required>
-  </label>
 
-  <label>
-    Policy Start Date:
+    <label>Policy Start Date:</label>
     <input type="text" id="startDate" placeholder="MM/DD/YYYY" required>
-  </label>
 
-  <label>
-    Policy End Date:
+    <label>Policy End Date:</label>
     <input type="text" id="endDate" placeholder="MM/DD/YYYY" required>
-  </label>
 
-  <label>
-    Cancellation Date:
+    <label>Cancellation Date:</label>
     <input type="text" id="cancelDate" placeholder="MM/DD/YYYY" required>
-  </label>
 
-  <label>
-    Short-Rate Penalty (% of unearned premium):
-    <input type="number" id="shortRatePenalty" step="0.01" min="0" max="100" value="10">
-  </label>
+    <div id="errorMessage" class="error" style="display:none;"></div>
 
-  <button type="submit">Calculate</button>
-</form>
+    <button type="submit">Calculate</button>
+  </form>
+</div>
 
 <div class="results" id="results" style="display:none;">
-  <div><strong>Total Policy Days:</strong> <span id="totalDays"></span></div>
-  <div><strong>Days Used:</strong> <span id="daysUsed"></span></div>
-  <div><strong>Earned Premium:</strong> $<span id="earnedPremium"></span></div>
-  <div><strong>Unearned Premium (Pro-Rata):</strong> $<span id="unearnedPremium"></span></div>
-  <div><strong>Pro-Rata Refund:</strong> $<span id="proRataRefund"></span></div>
-  <div><strong>Short-Rate Penalty Amount:</strong> $<span id="shortRatePenaltyAmount"></span></div>
-  <div><strong>Short-Rate Refund:</strong> $<span id="shortRateRefund"></span></div>
+
+  <div class="section-title">Pro‑Rata</div>
+  <div class="result-row"><span>Earned Premium:</span> <span id="prEarned"></span></div>
+  <div class="result-row"><span>Unearned Premium (return):</span> <span id="prUnearned"></span></div>
+  <div class="result-row"><span>Pro‑Rata Factor:</span> <span id="prFactor"></span></div>
+
+  <div class="section-title">Short‑Rate (10% Penalty)</div>
+  <div class="result-row"><span>Earned Premium:</span> <span id="srEarned"></span></div>
+  <div class="result-row"><span>Unearned Premium (return):</span> <span id="srUnearned"></span></div>
+  <div class="result-row"><span>Short‑Rate Factor:</span> <span id="srFactor"></span></div>
+
 </div>
 
 <script>
   function parseDate(input) {
     if (!input) return null;
-    const trimmed = input.trim();
-    const parts = trimmed.split('/');
+    const parts = input.trim().split('/');
     if (parts.length !== 3) return null;
 
-    const month = parseInt(parts[0], 10);
-    const day = parseInt(parts[1], 10);
-    const year = parseInt(parts[2], 10);
+    const m = parseInt(parts[0], 10);
+    const d = parseInt(parts[1], 10);
+    const y = parseInt(parts[2], 10);
 
-    if (isNaN(month) || isNaN(day) || isNaN(year)) return null;
-    if (month < 1 || month > 12) return null;
-    if (day < 1 || day > 31) return null;
-
-    const d = new Date(year, month - 1, day);
-    // Validate that JS didn't roll the date (e.g., 2/30 -> 3/2)
-    if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) {
+    const date = new Date(y, m - 1, d);
+    if (date.getMonth() !== m - 1 || date.getDate() !== d || date.getFullYear() !== y) {
       return null;
     }
-    return d;
+    return date;
   }
 
+  function formatDate(date) {
+    return `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()}`;
+  }
+
+  // Auto-fill cancellation date with today's date
+  window.onload = function () {
+    document.getElementById("cancelDate").value = formatDate(new Date());
+  };
+
+  // Auto-fill end date = start date + 1 year
+  document.getElementById("startDate").addEventListener("input", function () {
+    const start = parseDate(this.value);
+    if (start) {
+      const end = new Date(start);
+      end.setFullYear(end.getFullYear() + 1);
+      document.getElementById("endDate").value = formatDate(end);
+    }
+  });
+
   function calculate() {
-    const fullPremium = parseFloat(document.getElementById('fullPremium').value) || 0;
+    const premium = parseFloat(document.getElementById('fullPremium').value);
+    const start = parseDate(document.getElementById('startDate').value);
+    const end = parseDate(document.getElementById('endDate').value);
+    const cancel = parseDate(document.getElementById('cancelDate').value);
 
-    const startDate = parseDate(document.getElementById('startDate').value);
-    const endDate = parseDate(document.getElementById('endDate').value);
-    const cancelDate = parseDate(document.getElementById('cancelDate').value);
+    const errorBox = document.getElementById("errorMessage");
+    errorBox.style.display = "none";
 
-    const shortRatePenaltyPercent = parseFloat(document.getElementById('shortRatePenalty').value) || 0;
-
-    if (!startDate || !endDate || !cancelDate) {
-      alert("Please enter valid dates in MM/DD/YYYY format, e.g. 6/29/2025.");
+    if (!start || !end || !cancel) {
+      errorBox.textContent = "Please enter valid dates in MM/DD/YYYY format.";
+      errorBox.style.display = "block";
       return;
     }
 
-    if (cancelDate < startDate || cancelDate > endDate) {
-      alert("Cancellation date must be between the policy start and end dates.");
+    if (cancel < start || cancel > end) {
+      errorBox.textContent = "Cancellation date is not within the effective period.";
+      errorBox.style.display = "block";
       return;
     }
 
-    if (fullPremium <= 0) {
-      alert("Please enter a premium greater than 0.");
-      return;
-    }
+    const msDay = 1000 * 60 * 60 * 24;
+    const totalDays = Math.round((end - start) / msDay) + 1;
+    const usedDays = Math.round((cancel - start) / msDay) + 1;
 
-    const msPerDay = 1000 * 60 * 60 * 24;
+    const earned = premium * (usedDays / totalDays);
+    const unearned = premium - earned;
 
-    const totalDays = Math.round((endDate - startDate) / msPerDay) + 1;
-    const usedDays = Math.round((cancelDate - startDate) / msPerDay) + 1;
+    // Short‑rate = 10% penalty on unearned premium
+    const penalty = unearned * 0.10;
+    const shortRateUnearned = unearned - penalty;
 
-    if (totalDays <= 0 || usedDays < 1 || usedDays > totalDays) {
-      alert("There is an issue with the dates. Please double-check them.");
-      return;
-    }
+    // Populate Pro‑Rata
+    document.getElementById("prEarned").textContent = earned.toFixed(2);
+    document.getElementById("prUnearned").textContent = unearned.toFixed(2);
+    document.getElementById("prFactor").textContent = (unearned / premium).toFixed(4);
 
-    const earnedPremium = fullPremium * (usedDays / totalDays);
-    const unearnedPremium = fullPremium - earnedPremium;
-    const proRataRefund = unearnedPremium;
+    // Populate Short‑Rate
+    document.getElementById("srEarned").textContent = earned.toFixed(2);
+    document.getElementById("srUnearned").textContent = shortRateUnearned.toFixed(2);
+    document.getElementById("srFactor").textContent = (shortRateUnearned / premium).toFixed(4);
 
-    const penaltyFactor = shortRatePenaltyPercent / 100;
-    const shortRatePenaltyAmount = unearnedPremium * penaltyFactor;
-    const shortRateRefund = unearnedPremium - shortRatePenaltyAmount;
-
-    document.getElementById('totalDays').textContent = totalDays;
-    document.getElementById('daysUsed').textContent = usedDays;
-    document.getElementById('earnedPremium').textContent = earnedPremium.toFixed(2);
-    document.getElementById('unearnedPremium').textContent = unearnedPremium.toFixed(2);
-    document.getElementById('proRataRefund').textContent = proRataRefund.toFixed(2);
-    document.getElementById('shortRatePenaltyAmount').textContent = shortRatePenaltyAmount.toFixed(2);
-    document.getElementById('shortRateRefund').textContent = shortRateRefund.toFixed(2);
-
-    document.getElementById('results').style.display = 'block';
+    document.getElementById("results").style.display = "block";
   }
 </script>
 
