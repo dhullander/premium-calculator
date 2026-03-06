@@ -19,8 +19,25 @@
     body {
       font-family: Arial, sans-serif;
       margin: 40px;
-      background: #fffbe6;
       color: #333;
+
+      /* Animated gradient background */
+      background: linear-gradient(
+        -45deg,
+        #fff9c4,   /* light yellow */
+        #ffccbc,   /* soft red */
+        #c8e6c9,   /* light green */
+        #fff9c4
+      );
+      background-size: 400% 400%;
+      animation: gradientShift 18s ease infinite;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      33% { background-position: 100% 50%; }
+      66% { background-position: 50% 0%; }
+      100% { background-position: 0% 50%; }
     }
 
     h1 {
@@ -301,3 +318,4 @@
 </script>
 
 </body>
+</html>
