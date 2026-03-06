@@ -123,7 +123,7 @@
       border-radius: 4px;
       color: #2f6f4e;
       white-space: nowrap;
-      margin-top: 0; /* fix alignment vs global button rule */
+      margin-top: 0;
     }
 
     .copy-btn:hover {
@@ -155,6 +155,9 @@
 
     <label>Cancellation Date:</label>
     <input type="text" id="cancelDate" placeholder="MM/DD/YYYY" required>
+
+    <label>Pro‑Rata Factor (optional):</label>
+    <input type="number" id="manualFactor" step="0.0001" placeholder="e.g. 0.4521">
 
     <div id="errorMessage" class="error" style="display:none;"></div>
 
@@ -245,6 +248,7 @@
     const start = parseDate(document.getElementById('startDate').value);
     const end = parseDate(document.getElementById('endDate').value);
     const cancel = parseDate(document.getElementById('cancelDate').value);
+    const manualFactor = parseFloat(document.getElementById('manualFactor').value);
 
     const errorBox = document.getElementById("errorMessage");
     errorBox.style.display = "none";
@@ -265,15 +269,23 @@
     const totalDays = Math.round((end - start) / msDay) + 1;
     const usedDays = Math.round((cancel - start) / msDay) + 1;
 
-    const earned = premium * (usedDays / totalDays);
-    const unearned = premium - earned;
+    let prFactor;
+
+    if (!isNaN(manualFactor) && manualFactor >= 0 && manualFactor <= 1) {
+      prFactor = manualFactor;
+    } else {
+      prFactor = (premium - (premium * (usedDays / totalDays))) / premium;
+    }
+
+    const unearned = premium * prFactor;
+    const earned = premium - unearned;
 
     const penalty = unearned * 0.10;
     const shortRateUnearned = unearned - penalty;
 
     document.getElementById("prEarned").textContent = "$" + earned.toFixed(2);
     document.getElementById("prUnearned").textContent = "$" + unearned.toFixed(2);
-    document.getElementById("prFactor").textContent = (unearned / premium).toFixed(4);
+    document.getElementById("prFactor").textContent = prFactor.toFixed(4);
 
     document.getElementById("srEarned").textContent = "$" + earned.toFixed(2);
     document.getElementById("srUnearned").textContent = "$" + shortRateUnearned.toFixed(2);
@@ -289,4 +301,3 @@
 </script>
 
 </body>
-</html>
